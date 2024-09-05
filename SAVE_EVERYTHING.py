@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 # Welcome degenerate! This script will download all of your favorite hentai from nhentai.net and save them as PDFs.
+# MAKE SURE TO CHANGE THE PATH OF YOUR DOUJIN DOWNLOADS! 
+# Replace 'YOUR_PATH_HERE' with the path to the folder where you want to save the PDFs.
+# Example: OUTPUT_FOLDER = 'C:/Users/Username/Downloads'
+OUTPUT_FOLDER = 'YOUR_PATH_HERE'
+
 # Please enter the following into your command line (CMD) to run this script:
 # 1. pip install -r /path/to/requirements.txt
 # 2. python SAVE_EVERYTHING.py
-# Do note that manual login is required as you will have to complete the captcha
+# Note: Manual login is required to ensure that you can bypass the CAPTCHA.
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -16,6 +21,9 @@ from fpdf import FPDF
 import shutil
 from PIL import Image
 import re
+import zipfile
+
+
 
 # Initialize the WebDriver
 driver = webdriver.Firefox()
@@ -31,6 +39,18 @@ def empty_folder(folder_path):
         elif os.path.isdir(item_path):
             shutil.rmtree(item_path)
     print('emptied folder')
+
+def compress_to_cbz(img_paths, title):
+    cbz_file_path = f'{OUTPUT_FOLDER}/{title}.cbz'
+
+    try:
+        with zipfile.ZipFile(cbz_file_path, 'w') as cbz:
+            for img_path in img_paths:
+                img_filename = os.path.basename(img_path)  # Get the image filename
+                cbz.write(img_path, img_filename)  # Add the image to the cbz archive
+    except Exception as e:
+        print(f"Error saving CBZ: {e}")
+
 
 def compress_to_pdf(img_paths, title):
     pdf = FPDF()
@@ -63,7 +83,7 @@ def compress_to_pdf(img_paths, title):
             pdf.image(img_path, x=pdf.l_margin, y=pdf.t_margin, w=new_width, h=new_height)
 
     try:
-        pdf_file_path = f'C:/Users/Jamie/Downloads/{title}.pdf'
+        pdf_file_path = f'{OUTPUT_FOLDER}/{title}.pdf'
         pdf.output(pdf_file_path)
         print(f'PDF saved to {pdf_file_path}')
     except Exception as e:
@@ -103,7 +123,8 @@ def dirty_fuck(xpath):
     driver.back()
     driver.back()
     driver.back()
-    compress_to_pdf(img_paths, TITLE)
+    # compress_to_pdf(img_paths, TITLE)
+    compress_to_cbz(img_paths, TITLE)
     empty_folder('downloaded_images')
 
 try: 
